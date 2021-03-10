@@ -3,18 +3,24 @@ class BooksController < ApplicationController
     # Viewへ渡すためのインスタンス変数に空のモデルオブジェクトを生成する。
     @book = Book.new
   end
+
   def create
-    # １. データを新規登録するためのインスタンス作成
     @book = Book.new(book_params)
-    # ２. データをデータベースに保存するためのsaveメソッド実行
-    @book.save
-    # ３. トップ画面へリダイレクト
-    redirect_to book_path(@book.id)
+   if @book.save
+     flash[:notice] = "Book was successfully created."
+     redirect_to book_path(@book.id)
+   else
+      @books = Book.all
+      render 'index'
+   end
+
   end
 
   def index
-    @books = Book.all
+    @books = Book.all.order(id: "ASC")
     @book = Book.new
+
+
   end
 
   def show
@@ -23,18 +29,29 @@ class BooksController < ApplicationController
 
   def edit
     @book = Book.find(params[:id])
+
   end
 
   def update
    @book = Book.find(params[:id])
-    @book.update(book_params)
-    redirect_to book_path(book.id)
+   if @book.update(book_params)
+     flash[:notice] = "Book was successfully created."#
+    redirect_to book_path(@book.id)
+   else
+      @books = Book.all
+      render 'edit'
+   end
+
   end
 
   def destroy
    @book = Book.find(params[:id])  # データ（レコード）を1件取得
-    @book.destroy  # データ（レコード）を削除
-    redirect_to books_path  # 投稿一覧画面へリダイレクト
+   if @book.destroy
+      flash[:notice] = "Book was successfully created."# データ（レコード）を削除
+    redirect_to books_path
+   else
+      render("books/new")# 投稿一覧画面へリダイレクト
+   end
   end
 
   private
@@ -43,4 +60,3 @@ class BooksController < ApplicationController
    params.require(:book).permit(:title, :body)
   end
 end
-
